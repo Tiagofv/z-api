@@ -1,6 +1,6 @@
 <?php
 
-namespace VendorName\Skeleton\Tests;
+namespace Tiagofv\ZApi\Tests;
 
 class ExampleTest extends TestCase
 {
