@@ -38,6 +38,7 @@ class ZApi
      */
     public function __construct(string $instanceId, string $tokenId)
     {
+
         $this->instanceId = $instanceId;
         $this->tokenId = $tokenId;
         $this->baseUrl = "https://api.z-api.io/instances/{$instanceId}/token/{$tokenId}/";
@@ -52,11 +53,10 @@ class ZApi
         $client = new Client([
             'base_uri' => $this->baseUrl,
             'headers' => [
-                'content-type' => 'application/json',
+                'content-type' => 'application/json'
             ],
-            'form_params' => $formData,
+            'form_params' => $formData
         ]);
-
         return $client;
     }
 
@@ -64,7 +64,7 @@ class ZApi
     {
         $method = strtoupper($method);
         $allowedHttpVerbs = $this->allowedHttpVerbs;
-        if (! in_array($method, $allowedHttpVerbs)) {
+        if (!in_array($method, $allowedHttpVerbs)) {
             throw new \InvalidArgumentException(
                 "The supplied http method is invalid. Allowed values are " .
                 implode(',', $allowedHttpVerbs) . '. Supplied value: ' . $method
@@ -72,11 +72,10 @@ class ZApi
         }
 
         $response = $this->getClient($data)->request($method, $url);
-
-        return  json_decode($response->getBody()->getContents());
+        return $response->getBody()->getContents();
     }
 
-    // Instance related
+// Instance related
 
     /**
      * Generates the qr code returns in bytes
@@ -122,11 +121,9 @@ class ZApi
     {
         return $this->doRequest('GET', 'restore-session', []);
     }
-
     //    end instance related
 
     // message related
-
     /**
      * Sends a text message
      *
@@ -138,7 +135,7 @@ class ZApi
     {
         return $this->doRequest('POST', 'send-text', [
             'phone' => $phone,
-            'message' => $message,
+            'message' => $message
         ]);
     }
 
@@ -156,7 +153,7 @@ class ZApi
             'phone' => $phone,
             'contactName' => $contactName,
             'contactPhone' => $contactPhone,
-            'contactBusinessDescription' => $contactBusinessDescription,
+            'contactBusinessDescription' => $contactBusinessDescription
         ]);
     }
 
@@ -211,12 +208,10 @@ class ZApi
      */
     public function sendDocumentFromUrl(string $phone, string $documentUrl, string $extension)
     {
-        if (! in_array($extension, $this->allowedExtensions)) {
+        if (!in_array($extension, $this->allowedExtensions))
             throw new \InvalidArgumentException('Invalid extension supplied for extension parameter. It should be one of ' .
                 implode(',', $this->allowedExtensions)
                 . '. Supplied: ' . $extension);
-        }
-
         return $this->doRequest('POST', 'send-document/' . $extension, [
             'phone' => $phone,
             'document' => $documentUrl,
@@ -235,6 +230,7 @@ class ZApi
      */
     public function sendLink(string $phone, string $message, string $imageUrl, string $linkUrl, string $title, string $linkDescription)
     {
+
         return $this->doRequest('POST', 'send-link', [
             'phone' => $phone,
             'message' => $message . ' ' . $linkUrl,
@@ -273,10 +269,9 @@ class ZApi
         return $this->doRequest('POST', 'read-message', [
             'phone' => $phone,
             'messageId' => $messageId,
-            'owner' => $owner,
+            'owner' => $owner
         ]);
     }
-
     // end message related
 
 
@@ -306,11 +301,9 @@ class ZApi
             'image' => $imageB64,
         ]);
     }
-
     // End status related
 
     // start chat related
-
     /**
      * Get all chats of the instance
      * @return string
@@ -330,6 +323,7 @@ class ZApi
         return $this->doRequest('GET', 'chats/' . $phone, []);
     }
 
+
     /**
      * Get all chats of the instance created by the provided phone
      * @param string $chatPhone
@@ -339,11 +333,9 @@ class ZApi
     {
         return $this->doRequest('GET', 'chat-messages/' . $chatPhone, []);
     }
-
     // end chat related
 
     // contact related
-
     /**
      * Get contacts
      * @param int $page
@@ -384,6 +376,150 @@ class ZApi
     {
         return $this->doRequest('GET', "phone-exists/{$phone}", []);
     }
-
     //end contact related
+
+    //group related
+    /**
+     * Creates a group
+     * @param string $groupName
+     * @param array $phones e.g ['5527996665350', ...]
+     * @return string
+     */
+    public function createGroup(string $groupName, array $phones = [])
+    {
+        return $this->doRequest('POST', "create-group", [
+            'phones' => $phones,
+            'groupName' => $groupName,
+        ]);
+    }
+
+    /**
+     *  Updates a group name
+     * @param string $groupName group name
+     * @param array $groupId id of the group
+     * @return string
+     */
+    public function updateGroupName(string $groupName, array $groupId)
+    {
+        return $this->doRequest('POST', "update-group-name", [
+            'groupName' => $groupName,
+            'groupId' => $groupId,
+        ]);
+    }
+
+    /**
+     * Promotes member of the group to admin
+     * @param string $groupId id of the group
+     * @param array $phones
+     * @return string
+     */
+    public function addAdmin(string $groupId, array $phones)
+    {
+        return $this->doRequest('POST', "add-admin",
+            [
+                'phones' => $phones,
+                'groupId' => $groupId,
+            ]);
+    }
+
+    /**
+     * Removes a admin
+     * @param string $groupId id of the group
+     * @param array $phones
+     * @return string
+     */
+    public function removeAdmin(string $groupId, array $phones)
+    {
+        return $this->doRequest('POST', "remove-admin",
+            [
+                'phones' => $phones,
+                'groupId' => $groupId,
+            ]);
+    }
+
+    /**
+     * Add a participant to the group
+     * @param string $groupId id of the group
+     * @param array $phones
+     * @return string
+     */
+    public function addParticipant(string $groupId, array $phones)
+    {
+        return $this->doRequest('POST', "add-participant",
+            [
+                'phones' => $phones,
+                'groupId' => $groupId,
+            ]);
+    }
+
+
+    /**
+     * Removes a participant from the group
+     * @param string $groupId id of the group
+     * @param array $phones
+     * @return string
+     */
+    public function removeParticipant(string $groupId, array $phones)
+    {
+        return $this->doRequest('POST', "remove-participant",
+            [
+                'phones' => $phones,
+                'groupId' => $groupId,
+            ]);
+    }
+
+    /**
+     * Leaves a group
+     * @param string $groupId id of the group
+     * @return string
+     */
+    public function leaveGroup(string $groupId)
+    {
+        return $this->doRequest('POST', "leave-group",
+            [
+                'groupId' => $groupId,
+            ]);
+    }
+
+    /**
+     * Gets group metadata
+     * @param string $groupPhoneId phone + id of the group
+     * @return string
+     */
+    public function getGroupMetadata(string $groupPhoneId)
+    {
+        return $this->doRequest('GET', "group-metadata/" . $groupPhoneId, []);
+    }
+
+    // end group related
+
+    // queue related
+    /**
+     * Returns all messages of the queue
+     * @return string
+     */
+    public function getQueue()
+    {
+        return $this->doRequest('GET', "queue", []);
+    }
+
+    /**
+     * Empty the queue
+     * @return string
+     */
+    public function removeAllMessagesFromQueue()
+    {
+        return $this->doRequest('DELETE', "queue", []);
+    }
+
+    /**
+     * Remove  a specific message by zapId
+     * @param string $zapId
+     * @return string
+     */
+    public function removeMessageByZapId(string $zapId)
+    {
+        return $this->doRequest('DELETE', "queue/".$zapId, []);
+    }
+    //end queue related
 }
