@@ -54,7 +54,7 @@ class ZApi
             'headers' => [
                 'content-type' => 'application/json',
             ],
-            'form_params' => $formData,
+            'body' => json_encode($formData),
         ]);
 
         return $client;
