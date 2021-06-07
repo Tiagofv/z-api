@@ -72,7 +72,7 @@ class ZApi
         }
 
         $response = $this->getClient($data)->request($method, $url);
-        return $response->getBody()->getContents();
+        return json_decode($response->getBody()->getContents());
     }
 
 // Instance related
